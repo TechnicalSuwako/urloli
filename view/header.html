@@ -1,0 +1,21 @@
+{{define "header"}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="title" content="URLロリ" />
+    <meta name="description" content="クッソ小さいURL短縮作成ソフトだわ〜♡" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>URLロリ〜{{.Tit}}</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+  </head>
+  <body>
+    <h1>
+      <img class="headerimg" src="/static/logo.jpg" alt="{{if eq .Lan "ja"}}ロゴ{{else}}Logo{{end}}" />
+    </h1>
+    <div class="body">
+      <p>
+        <a href="/">{{if eq .Lan "ja"}}トップ{{else}}Top{{end}}</a>
+      </p>
+{{end}}

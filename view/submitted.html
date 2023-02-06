@@ -1,0 +1,8 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+{{template "header" .}}
+      {{if eq .Lan "ja"}}下記のURLからアクセス出来ます。{{else}}Please enter a URL.{{end}}
+      <br />
+      <a href="https://urlo.li/{{ .Url }}">https://urlo.li/{{ .Url }}</a>
+      <br /><br />
+      <a href="/">{{if eq .Lan "ja"}}トップページに戻る{{else}}Return to toppage{{end}}</a>
+{{template "footer" .}}

@@ -1,0 +1,17 @@
+{{template "header" .}}
+      <form action="/" method="POST">
+        <div class="switchlang">
+          <input class="langchange" type="submit" name="langchange" value="{{if eq .Lan "ja"}}Change to English{{else}}日本語に変更する{{end}}" />
+        </div>
+      </form>
+      <hr />
+      {{if eq .Lan "ja"}}URLをご入力下さい{{else}}Please enter a URL.{{end}}
+      <div class="form">
+        <form action="/" method="POST">
+          <input type="text" name="newadd" value="" />
+          <div class="submit">
+            <input type="submit" name="sosin" value="{{if eq .Lan "ja"}}送信{{else}}Submit{{end}}" />
+          </div>
+        </form>
+      </div>
+{{template "footer" .}}
