@@ -115,7 +115,9 @@ func main () {
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
     cookie, err := r.Cookie("lang")
     if err != nil {
-      http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja"})
+      http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
+      http.Redirect(w, r, "/", http.StatusSeeOther)
+      return
     }
 
     uri := r.URL.Path
@@ -157,6 +159,7 @@ func main () {
             chkfn := checkjson(addurl)
             if chkfn {
               http.Redirect(w, r, addurl, http.StatusSeeOther)
+              return
             } else {
               res := insertjson(addurl)
               if cookie.Value == "ja" {
@@ -182,6 +185,7 @@ func main () {
           http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja"})
         }
         http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
       }
     } else {
       if uri == "/" && qnewurl == "" {
@@ -190,6 +194,7 @@ func main () {
         red := geturl(uri[1:])
         if red != "" {
           http.Redirect(w, r, red, http.StatusSeeOther)
+          return
         } else {
           if cookie.Value == "ja" {
               data = &Page{Tit: "未検出", Err: "このURLを見つけられませんでした。", Lan: cookie.Value}
