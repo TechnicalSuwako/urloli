@@ -4,7 +4,8 @@
 ## 使い方
 ```sh
 cp links.sample.json links.json
-nvim links.json
+mkdir /etc/urloli
+mv links.json /etc/urloli
 
 useradd -m -s /usr/local/bin/zsh urloli
 su -l urloli
@@ -14,6 +15,7 @@ exit
 
 mv /home/urloli/urlo.li/urloli /usr/local/bin
 chown -R urloli:urloli /usr/local/bin/urloli
+chown -R urloli:urloli /etc/urloli
 
 rcctl start urloli
 ```

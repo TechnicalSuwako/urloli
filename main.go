@@ -49,7 +49,7 @@ func checkcharlim (url string) bool {
 }
 
 func geturl (key string) string {
-  data, err := ioutil.ReadFile("./links.json")
+  data, err := ioutil.ReadFile("/etc/urloli/links.json")
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -67,7 +67,7 @@ func geturl (key string) string {
 }
 
 func checkjson (url string) bool {
-  data, err := ioutil.ReadFile("./links.json")
+  data, err := ioutil.ReadFile("/etc/urloli/links.json")
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -85,7 +85,7 @@ func checkjson (url string) bool {
 }
 
 func insertjson (url string) string {
-  data, err := ioutil.ReadFile("./links.json")
+  data, err := ioutil.ReadFile("/etc/urloli/links.json")
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -96,7 +96,7 @@ func insertjson (url string) string {
   newstring := mkstring()
   payload[newstring] = url
   m, _ := json.Marshal(&payload)
-  ioutil.WriteFile("links.json", m, os.ModePerm)
+  ioutil.WriteFile("/etc/urloli/links.json", m, os.ModePerm)
   // fmt.Printf("%s\n", m)
 
   return newstring
