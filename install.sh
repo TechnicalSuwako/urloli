@@ -6,7 +6,7 @@ cp links.sample.json /etc/urloli/links.json
 
 go build
 
-mv /home/urloli/urlo.li/urloli /usr/local/bin
+mv urloli /usr/local/bin
 chown -R urloli:urloli /usr/local/bin/urloli
 chown -R urloli:urloli /etc/urloli
 
