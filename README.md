@@ -3,7 +3,7 @@
 
 ## インストールする方法
 ```sh
-chmod +x install.sh && ./install.sh
+chmod +x install.sh && doas ./install.sh domain.tld
 ```
 
 ## links.jsonファイルの中に
