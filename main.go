@@ -10,6 +10,12 @@ import (
   "unicode/utf8"
   "io/ioutil"
   "os"
+  "runtime"
+)
+
+var (
+  linkpath string
+  configpath string
 )
 
 func mkstring () string {
@@ -49,7 +55,7 @@ func checkcharlim (url string) bool {
 }
 
 func geturl (key string) string {
-  data, err := ioutil.ReadFile("/etc/urloli/links.json")
+  data, err := ioutil.ReadFile(linkpath)
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -67,7 +73,7 @@ func geturl (key string) string {
 }
 
 func checkjson (url string) bool {
-  data, err := ioutil.ReadFile("/etc/urloli/links.json")
+  data, err := ioutil.ReadFile(linkpath)
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -85,7 +91,7 @@ func checkjson (url string) bool {
 }
 
 func insertjson (url string) string {
-  data, err := ioutil.ReadFile("/etc/urloli/links.json")
+  data, err := ioutil.ReadFile(linkpath)
   if err != nil {
     fmt.Println("links.jsonを開けられません: ", err)
   }
@@ -96,7 +102,7 @@ func insertjson (url string) string {
   newstring := mkstring()
   payload[newstring] = url
   m, _ := json.Marshal(&payload)
-  ioutil.WriteFile("/etc/urloli/links.json", m, os.ModePerm)
+  ioutil.WriteFile(linkpath, m, os.ModePerm)
   // fmt.Printf("%s\n", m)
 
   return newstring
@@ -106,10 +112,32 @@ type Page struct {
   Tit string
   Err string
   Url string
+  Dom string
   Lan string
 }
 
 func main () {
+  if runtime.GOOS == "freebsd" {
+    linkpath = "/usr/local/etc/urloli/links.json"
+    configpath = "/usr/local/etc/urloli/config.json"
+  } else {
+    linkpath = "/etc/urloli/links.json"
+    configpath = "/etc/urloli/config.json"
+  }
+  var domain string
+
+  data, err := ioutil.ReadFile(configpath)
+  if err != nil {
+    fmt.Println("config.jsonを開けられません: ", err)
+  }
+
+  var payload map[string]interface{}
+  json.Unmarshal(data, &payload)
+
+  for k := range payload {
+    domain = payload[k].(string)
+  }
+
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -163,9 +191,9 @@ func main () {
             } else {
               res := insertjson(addurl)
               if cookie.Value == "ja" {
-                data = &Page{Tit: "短縮済み", Lan: cookie.Value, Url: res}
+                data = &Page{Tit: "短縮済み", Lan: cookie.Value, Url: res, Dom: domain}
               } else {
-                data = &Page{Tit: "Shortened", Lan: cookie.Value, Url: res}
+                data = &Page{Tit: "Shortened", Lan: cookie.Value, Url: res, Dom: domain}
               }
               tmpl = template.Must(template.ParseFiles("view/submitted.html", "view/header.html", "view/footer.html"))
             }
@@ -204,7 +232,7 @@ func main () {
           tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
         }
       } else if uri == "/" && qnewurl != "" {
-        data = &Page{Tit: "短縮済み", Url: qnewurl}
+        data = &Page{Tit: "短縮済み", Url: qnewurl, Dom: domain}
         tmpl = template.Must(template.ParseFiles("view/submitted.html", "view/header.html", "view/footer.html"))
       } else {
         if cookie.Value == "ja" {
