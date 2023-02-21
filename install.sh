@@ -49,8 +49,10 @@ elif [ "$unamestr" = 'OpenBSD' ]; then
   if [ "$network" = 'www' ]; then
     cat /etc/acme-client.conf srv/openbsd/etc/acme-client.conf > /etc/acme-client.conf
     sed -i "s/urlo\.li/$domain/g" /etc/acme-client.conf
+    cat /etc/httpd.conf srv/openbsd/etc/httpd-clear.conf > /etc/httpd.conf
+  else
+    cat /etc/httpd.conf srv/openbsd/etc/httpd-dark.conf > /etc/httpd.conf
   fi
-  cat /etc/httpd.conf srv/openbsd/etc/httpd.conf > /etc/httpd.conf
   sed -i "s/urlo\.li/$domain/g" /etc/httpd.conf
   rcctl restart httpd
   if [ "$network" = 'www' ]; then
