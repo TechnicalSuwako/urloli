@@ -16,6 +16,7 @@ import (
 var (
   linkpath string
   configpath string
+  payload map[string]interface{}
 )
 
 func mkstring () string {
@@ -54,50 +55,26 @@ func checkcharlim (url string) bool {
   return true
 }
 
-func geturl (key string) string {
-  data, err := ioutil.ReadFile(linkpath)
-  if err != nil {
-    fmt.Println("links.jsonを開けられません: ", err)
-  }
-
-  var payload map[string]interface{}
-  json.Unmarshal(data, &payload)
+func geturl (url string, checkjson bool) string {
+  payload := getlinks()
 
   for k := range payload {
-    if key == k {
-      return payload[k].(string)
+    if checkjson {
+      if url == payload[k] {
+        return url
+      }
+    } else {
+      if url == k {
+        return payload[k].(string)
+      }
     }
   }
 
   return ""
 }
 
-func checkjson (url string) bool {
-  data, err := ioutil.ReadFile(linkpath)
-  if err != nil {
-    fmt.Println("links.jsonを開けられません: ", err)
-  }
-
-  var payload map[string]interface{}
-  json.Unmarshal(data, &payload)
-
-  for k := range payload {
-    if url == payload[k] {
-      return true
-    }
-  }
-
-  return false
-}
-
 func insertjson (url string) string {
-  data, err := ioutil.ReadFile(linkpath)
-  if err != nil {
-    fmt.Println("links.jsonを開けられません: ", err)
-  }
-
-  var payload map[string]interface{}
-  json.Unmarshal(data, &payload)
+  payload := getlinks()
 
   newstring := mkstring()
   payload[newstring] = url
@@ -116,6 +93,18 @@ type Page struct {
   Lan string
 }
 
+func getlinks () map[string]interface{} {
+  data, err := ioutil.ReadFile(linkpath)
+  if err != nil {
+    fmt.Println("links.jsonを開けられません: ", err)
+  }
+
+  var payload map[string]interface{}
+  json.Unmarshal(data, &payload)
+
+  return payload
+}
+
 func main () {
   if runtime.GOOS == "freebsd" {
     linkpath = "/usr/local/etc/urloli/links.json"
@@ -125,14 +114,7 @@ func main () {
     configpath = "/etc/urloli/config.json"
   }
   var domain string
-
-  data, err := ioutil.ReadFile(configpath)
-  if err != nil {
-    fmt.Println("config.jsonを開けられません: ", err)
-  }
-
-  var payload map[string]interface{}
-  json.Unmarshal(data, &payload)
+  payload := getlinks()
 
   for k := range payload {
     domain = payload[k].(string)
@@ -184,8 +166,8 @@ func main () {
           }
 
           if chklim && chkprx {
-            chkfn := checkjson(addurl)
-            if chkfn {
+            chkfn := geturl(addurl, true)
+            if chkfn != "" {
               http.Redirect(w, r, addurl, http.StatusSeeOther)
               return
             } else {
@@ -219,7 +201,7 @@ func main () {
       if uri == "/" && qnewurl == "" {
         tmpl = template.Must(template.ParseFiles("view/index.html", "view/header.html", "view/footer.html"))
       } else if uri != "/" && qnewurl == "" {
-        red := geturl(uri[1:])
+        red := geturl(uri[1:], false)
         if red != "" {
           http.Redirect(w, r, red, http.StatusSeeOther)
           return
