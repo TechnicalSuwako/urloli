@@ -79,6 +79,7 @@ func insertjson (url string) string {
   newstring := mkstring()
   payload[newstring] = url
   m, _ := json.Marshal(&payload)
+  payload = nil
   ioutil.WriteFile(linkpath, m, os.ModePerm)
   // fmt.Printf("%s\n", m)
 
@@ -120,6 +121,7 @@ func main () {
     domain = payload[k].(string)
   }
 
+  payload = nil
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -227,6 +229,7 @@ func main () {
     }
 
     tmpl.Execute(w, data)
+    data = nil
   })
 
   fmt.Println("http://127.0.0.1:9910 でサーバーを実行中。終了するには、CTRL+Cを押して下さい。")
