@@ -106,6 +106,18 @@ func getlinks () map[string]interface{} {
   return payload
 }
 
+func getconfig () map[string]interface{} {
+  data, err := ioutil.ReadFile(configpath)
+  if err != nil {
+    fmt.Println("config.jsonを開けられません: ", err)
+  }
+
+  var payload map[string]interface{}
+  json.Unmarshal(data, &payload)
+
+  return payload
+}
+
 func main () {
   if runtime.GOOS == "freebsd" {
     linkpath = "/usr/local/etc/urloli/links.json"
@@ -114,12 +126,9 @@ func main () {
     linkpath = "/etc/urloli/links.json"
     configpath = "/etc/urloli/config.json"
   }
-  var domain string
-  payload := getlinks()
 
-  for k := range payload {
-    domain = payload[k].(string)
-  }
+  payload := getconfig()
+  domain := payload["domain"].(string)
 
   payload = nil
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
