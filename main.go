@@ -16,6 +16,7 @@ import (
 var (
   linkpath string
   configpath string
+  webpath string
   payload map[string]interface{}
 )
 
@@ -129,6 +130,7 @@ func main () {
 
   payload := getconfig()
   domain := payload["domain"].(string)
+  webpath := payload["webpath"].(string)
 
   payload = nil
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -148,7 +150,7 @@ func main () {
     if cookie.Value == "en" {
       data = &Page{Tit: "Top", Lan: cookie.Value}
     }
-    tmpl := template.Must(template.ParseFiles("view/index.html", "view/header.html", "view/footer.html"))
+    tmpl := template.Must(template.ParseFiles(webpath + "/view/index.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
 
     if r.Method == "POST" {
       err := r.ParseForm()
@@ -164,7 +166,7 @@ func main () {
             } else {
               data = &Page{Tit: "Invalid URL", Err: "The URL should start with \"http://\" or \"https://\".", Lan: cookie.Value}
             }
-            tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
+            tmpl = template.Must(template.ParseFiles(webpath + "/view/404.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
           }
           if !chklim {
             if cookie.Value == "ja" {
@@ -173,7 +175,7 @@ func main () {
               data = &Page{Tit: "Invalid URL", Err: "The URL should be less than 500 characters.", Lan: cookie.Value}
             }
             data = &Page{Tit: "不正なURL", Err: ""}
-            tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
+            tmpl = template.Must(template.ParseFiles(webpath + "/view/404.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
           }
 
           if chklim && chkprx {
@@ -188,7 +190,7 @@ func main () {
               } else {
                 data = &Page{Tit: "Shortened", Lan: cookie.Value, Url: res, Dom: domain}
               }
-              tmpl = template.Must(template.ParseFiles("view/submitted.html", "view/header.html", "view/footer.html"))
+              tmpl = template.Must(template.ParseFiles(webpath + "/view/submitted.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
             }
           }
         } else {
@@ -197,7 +199,7 @@ func main () {
           } else {
             data = &Page{Tit: "Not found", Err: "Please enter a URL.", Lan: cookie.Value}
           }
-          tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
+          tmpl = template.Must(template.ParseFiles(webpath + "/view/404.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
         }
       } else if r.PostForm.Get("langchange") != "" {
         if cookie.Value == "ja" {
@@ -210,7 +212,7 @@ func main () {
       }
     } else {
       if uri == "/" && qnewurl == "" {
-        tmpl = template.Must(template.ParseFiles("view/index.html", "view/header.html", "view/footer.html"))
+        tmpl = template.Must(template.ParseFiles(webpath + "/view/index.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
       } else if uri != "/" && qnewurl == "" {
         red := geturl(uri[1:], false)
         if red != "" {
@@ -222,18 +224,18 @@ func main () {
           } else {
             data = &Page{Tit: "Not found", Err: "This URL could not be found.", Lan: cookie.Value}
           }
-          tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
+          tmpl = template.Must(template.ParseFiles(webpath + "/view/404.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
         }
       } else if uri == "/" && qnewurl != "" {
         data = &Page{Tit: "短縮済み", Url: qnewurl, Dom: domain}
-        tmpl = template.Must(template.ParseFiles("view/submitted.html", "view/header.html", "view/footer.html"))
+        tmpl = template.Must(template.ParseFiles(webpath + "/view/submitted.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
       } else {
         if cookie.Value == "ja" {
             data = &Page{Tit: "未検出", Err: "このURLを見つけられませんでした。", Lan: cookie.Value}
         } else {
           data = &Page{Tit: "Not found", Err: "This URL could not be found.", Lan: cookie.Value}
         }
-        tmpl = template.Must(template.ParseFiles("view/404.html", "view/header.html", "view/footer.html"))
+        tmpl = template.Must(template.ParseFiles(webpath + "/view/404.html", webpath + "/view/header.html", webpath + "/view/footer.html"))
       }
     }
 
