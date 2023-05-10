@@ -1,5 +1,5 @@
 NAME=urloli
-VERSION=2.0.0
+VERSION=2.0.1
 # Linux、Cruxの場合は必須。他のディストリビューションはどうでも良い
 PREFIX=/usr
 # FreeBSDとOpenBSD

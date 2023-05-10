@@ -30,7 +30,7 @@ func serv (cnf Config, port int) {
     qnewurl := query.Get("newurl")
     data := &Page{Tit: "トップ", Lan: cookie.Value}
     if cookie.Value == "en" {
-      data = &Page{Tit: "Top", Lan: cookie.Value}
+      data.Tit = "Top"
     }
     tmpl := template.Must(template.ParseFiles(cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
 
@@ -44,19 +44,22 @@ func serv (cnf Config, port int) {
           chklim := checkcharlim(addurl)
           if !chkprx {
             if cookie.Value == "ja" {
-                data = &Page{Tit: "不正なURL", Err: "URLは「http://」又は「https://」で始めます。", Lan: cookie.Value}
+              data.Tit = "不正なURL"
+              data.Err = "URLは「http://」又は「https://」で始めます。"
             } else {
-              data = &Page{Tit: "Invalid URL", Err: "The URL should start with \"http://\" or \"https://\".", Lan: cookie.Value}
+              data.Tit = "Invalid URL"
+              data.Err = "The URL should start with \"http://\" or \"https://\"."
             }
             tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
           }
           if !chklim {
             if cookie.Value == "ja" {
-              data = &Page{Tit: "不正なURL", Err: "URLは500文字以内です。", Lan: cookie.Value}
+              data.Tit = "不正なURL"
+              data.Err = "URLは500文字以内です。"
             } else {
-              data = &Page{Tit: "Invalid URL", Err: "The URL should be less than 500 characters.", Lan: cookie.Value}
+              data.Tit = "Invalid URL"
+              data.Err = "The URL should be less than 500 characters."
             }
-            data = &Page{Tit: "不正なURL", Err: ""}
             tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
           }
 
@@ -67,19 +70,23 @@ func serv (cnf Config, port int) {
               return
             } else {
               res := insertjson(addurl, cnf.linkpath)
+              data.Url = res
+              data.Dom = cnf.domain
               if cookie.Value == "ja" {
-                data = &Page{Tit: "短縮済み", Lan: cookie.Value, Url: res, Dom: cnf.domain}
+                data.Tit = "短縮済み"
               } else {
-                data = &Page{Tit: "Shortened", Lan: cookie.Value, Url: res, Dom: cnf.domain}
+                data.Tit = "Shortened"
               }
               tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/submitted.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
             }
           }
         } else {
           if cookie.Value == "ja" {
-            data = &Page{Tit: "未検出", Err: "URLをご入力下さい。", Lan: cookie.Value}
+            data.Tit = "未検出"
+            data.Err = "URLをご入力下さい。"
           } else {
-            data = &Page{Tit: "Not found", Err: "Please enter a URL.", Lan: cookie.Value}
+            data.Tit = "Not found"
+            data.Err = "Please enter a URL."
           }
           tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
         }
@@ -102,20 +109,30 @@ func serv (cnf Config, port int) {
           return
         } else {
           if cookie.Value == "ja" {
-            data = &Page{Tit: "未検出", Err: "このURLを見つけられませんでした。", Lan: cookie.Value}
+            data.Tit = "未検出"
+            data.Err = "このURLを見つけられませんでした。"
           } else {
-            data = &Page{Tit: "Not found", Err: "This URL could not be found.", Lan: cookie.Value}
+            data.Tit = "Not found"
+            data.Err = "This URL could not be found."
           }
           tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
         }
       } else if uri == "/" && qnewurl != "" {
-        data = &Page{Tit: "短縮済み", Url: qnewurl, Dom: cnf.domain}
+        data.Url = qnewurl
+        data.Dom = cnf.domain
+        if cookie.Value == "ja" {
+          data.Tit = "短縮済み"
+        } else {
+          data.Tit = "Shortened"
+        }
         tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/submitted.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
       } else {
         if cookie.Value == "ja" {
-          data = &Page{Tit: "未検出", Err: "このURLを見つけられませんでした。", Lan: cookie.Value}
+          data.Tit = "未検出"
+          data.Err = "このURLを見つけられませんでした。"
         } else {
-          data = &Page{Tit: "Not found", Err: "This URL could not be found.", Lan: cookie.Value}
+          data.Tit = "Not found"
+          data.Err = "This URL could not be found."
         }
         tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
       }
