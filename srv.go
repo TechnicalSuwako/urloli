@@ -12,6 +12,7 @@ type Page struct {
   Url string
   Dom string
   Lan string
+  Ver string
 }
 
 func serv (cnf Config, port int) {
@@ -28,7 +29,7 @@ func serv (cnf Config, port int) {
     uri := r.URL.Path
     query := r.URL.Query()
     qnewurl := query.Get("newurl")
-    data := &Page{Tit: "トップ", Lan: cookie.Value}
+    data := &Page{Tit: "トップ", Lan: cookie.Value, Ver: version}
     if cookie.Value == "en" {
       data.Tit = "Top"
     }
