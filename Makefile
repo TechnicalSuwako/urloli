@@ -1,5 +1,5 @@
 NAME=urloli
-VERSION=2.0.1
+VERSION=2.0.2p
 # Linux、Cruxの場合は必須。他のディストリビューションはどうでも良い
 PREFIX=/usr
 # FreeBSDとOpenBSD
@@ -30,7 +30,7 @@ dist: clean
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f ${NAME} ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}/bin/${NAME}
+	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < ${NAME}.1 > ${DESTDIR}${MANPREFIX}/man1/${NAME}.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/${NAME}.1
