@@ -13,7 +13,7 @@ func help () {
   fmt.Println("urloli -v               ：バージョンを表示");
   fmt.Println("urloli -s [ポート番号]  ：ポート番号でウェブサーバーを実行（デフォルト＝9910）");
   fmt.Println("urloli -h               ：ヘルプを表示");
-  fmt.Println("urloli <URL>            ：コマンドラインでURLを短熟");
+  fmt.Println("urloli <URL>            ：コマンドラインでURLを短縮");
 }
 
 func main () {
