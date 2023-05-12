@@ -19,18 +19,18 @@ func serv (cnf Config, port int) {
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    data := &Page{Tit: "トップ", Ver: version}
     cookie, err := r.Cookie("lang")
     if err != nil {
-      http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
-      http.Redirect(w, r, "/", http.StatusSeeOther)
-      return
+      data.Lan = "ja"
+    } else {
+      data.Lan = cookie.Value
     }
 
     uri := r.URL.Path
     query := r.URL.Query()
     qnewurl := query.Get("newurl")
-    data := &Page{Tit: "トップ", Lan: cookie.Value, Ver: version}
-    if cookie.Value == "en" {
+    if data.Lan == "en" {
       data.Tit = "Top"
     }
     tmpl := template.Must(template.ParseFiles(cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
@@ -44,7 +44,7 @@ func serv (cnf Config, port int) {
           chkprx := checkprefix(addurl)
           chklim := checkcharlim(addurl)
           if !chkprx {
-            if cookie.Value == "ja" {
+            if data.Lan == "ja" {
               data.Tit = "不正なURL"
               data.Err = "URLは「http://」又は「https://」で始めます。"
             } else {
@@ -54,7 +54,7 @@ func serv (cnf Config, port int) {
             tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
           }
           if !chklim {
-            if cookie.Value == "ja" {
+            if data.Lan == "ja" {
               data.Tit = "不正なURL"
               data.Err = "URLは500文字以内です。"
             } else {
@@ -73,7 +73,7 @@ func serv (cnf Config, port int) {
               res := insertjson(addurl, cnf.linkpath)
               data.Url = res
               data.Dom = cnf.domain
-              if cookie.Value == "ja" {
+              if data.Lan == "ja" {
                 data.Tit = "短縮済み"
               } else {
                 data.Tit = "Shortened"
@@ -82,7 +82,7 @@ func serv (cnf Config, port int) {
             }
           }
         } else {
-          if cookie.Value == "ja" {
+          if data.Lan == "ja" {
             data.Tit = "未検出"
             data.Err = "URLをご入力下さい。"
           } else {
@@ -92,10 +92,11 @@ func serv (cnf Config, port int) {
           tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
         }
       } else if r.PostForm.Get("langchange") != "" {
-        if cookie.Value == "ja" {
-          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "en"})
+        cookie, err := r.Cookie("lang")
+        if err != nil || cookie.Value == "ja" {
+          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "en", MaxAge: 31536000, Path: "/"})
         } else {
-          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja"})
+          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
         }
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
@@ -109,7 +110,7 @@ func serv (cnf Config, port int) {
           http.Redirect(w, r, red, http.StatusSeeOther)
           return
         } else {
-          if cookie.Value == "ja" {
+          if data.Lan == "ja" {
             data.Tit = "未検出"
             data.Err = "このURLを見つけられませんでした。"
           } else {
@@ -121,14 +122,14 @@ func serv (cnf Config, port int) {
       } else if uri == "/" && qnewurl != "" {
         data.Url = qnewurl
         data.Dom = cnf.domain
-        if cookie.Value == "ja" {
+        if data.Lan == "ja" {
           data.Tit = "短縮済み"
         } else {
           data.Tit = "Shortened"
         }
         tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/submitted.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
       } else {
-        if cookie.Value == "ja" {
+        if data.Lan == "ja" {
           data.Tit = "未検出"
           data.Err = "このURLを見つけられませんでした。"
         } else {
