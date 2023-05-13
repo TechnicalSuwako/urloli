@@ -5,6 +5,7 @@ import (
   "fmt"
   "net/http"
   "encoding/json"
+  "strings"
 )
 
 type (
@@ -15,6 +16,7 @@ type (
     Dom string
     Lan string
     Ver string
+    Ves string
   }
   Api struct {
     Cod int `json:"code"`
@@ -22,6 +24,10 @@ type (
     Url string `json:"url"`
     Mot string `json:"origin"`
     New bool `json:"isnew"`
+  }
+  Stat struct {
+    Url string `json:"url"`
+    Ver string `json:"version"`
   }
 )
 
@@ -32,7 +38,7 @@ func serv (cnf Config, port int) {
   http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(200)
-    buf, _ := json.MarshalIndent(&Api{Cod: 200}, "", "  ")
+    buf, _ := json.MarshalIndent(&Stat{Url: cnf.domain, Ver: version}, "", "  ")
     _, _ = w.Write(buf)
   })
 
@@ -76,7 +82,7 @@ func serv (cnf Config, port int) {
   })
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-    data := &Page{Ver: version}
+    data := &Page{Ver: version, Ves: strings.ReplaceAll(version, ".", "")}
     uri := r.URL.Path
 
     cookie, err := r.Cookie("lang")
