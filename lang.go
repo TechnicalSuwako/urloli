@@ -27,7 +27,7 @@ func getlist (lang string) []byte {
     "errurlnai": "This URL could not be found."
   }`)
 
-  if (lang == "en") { return eloc }
+  if lang == "en" { return eloc }
   return jloc
 }
 
@@ -35,7 +35,7 @@ func getloc (str string, lang string) string {
   var payload map[string]interface{}
   err := json.Unmarshal(getlist(lang), &payload)
   if err != nil {
-    fmt.Println("loc: ", err)
+    fmt.Println("loc:", err)
     return ""
   }
 
