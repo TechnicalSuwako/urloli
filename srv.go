@@ -39,14 +39,12 @@ func serv (cnf Config, port int) {
   http.HandleFunc("/api/lolify", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(200)
-    uri := r.URL.Path
-    fmt.Println(uri)
     res := &Api{Cod: 500, Err: "未対応"}
     if r.Method == "POST" {
       err := r.ParseForm()
       if err != nil {
         fmt.Println(err)
-        res = &Api{Cod: 500, Err: "失敗"}
+        res.Err = "失敗"
       } else {
         if r.PostForm.Get("url") != "" {
           addurl := r.PostForm.Get("url")
@@ -79,6 +77,8 @@ func serv (cnf Config, port int) {
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
     data := &Page{Ver: version}
+    uri := r.URL.Path
+
     cookie, err := r.Cookie("lang")
     if err != nil {
       data.Lan = "ja"
@@ -86,11 +86,10 @@ func serv (cnf Config, port int) {
       data.Lan = cookie.Value
     }
 
-    uri := r.URL.Path
-    query := r.URL.Query()
-    qnewurl := query.Get("newurl")
-    data.Tit = getloc("top", data.Lan)
-    ftmpl[0] = cnf.webpath + "/view/index.html"
+    // デフォルトページ＝未検出
+    data.Tit = getloc("mikensyutu", data.Lan)
+    data.Err = getloc("errurlnai", data.Lan)
+    ftmpl[0] = cnf.webpath + "/view/404.html"
     tmpl := template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
 
     if r.Method == "POST" {
@@ -101,20 +100,14 @@ func serv (cnf Config, port int) {
           addurl := r.PostForm.Get("newadd")
           chkprx := checkprefix(addurl)
           chklim := checkcharlim(addurl)
-          if !chkprx {
+          if !chkprx || !chklim {
             data.Tit = getloc("fuseiurl", data.Lan)
-            data.Err = getloc("errfusei", data.Lan)
-            ftmpl[0] = cnf.webpath + "/view/404.html"
-            tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
-          }
-          if !chklim {
-            data.Tit = getloc("fuseiurl", data.Lan)
-            data.Err = getloc("errcharlim", data.Lan)
-            ftmpl[0] = cnf.webpath + "/view/404.html"
-            tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
-          }
-
-          if chklim && chkprx {
+            if !chkprx {
+              data.Err = getloc("errfusei", data.Lan)
+            } else if !chklim {
+              data.Err = getloc("errcharlim", data.Lan)
+            }
+          } else {
             chkfn, _ := geturl(addurl, cnf.linkpath, true)
             if chkfn != "" {
               http.Redirect(w, r, addurl, http.StatusSeeOther)
@@ -124,54 +117,35 @@ func serv (cnf Config, port int) {
               data.Dom = cnf.domain
               data.Tit = getloc("tansyukuzumi", data.Lan)
               ftmpl[0] = cnf.webpath + "/view/submitted.html"
-              tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
             }
           }
         } else {
-          data.Tit = getloc("mikensyutu", data.Lan)
           data.Err = getloc("errurlent", data.Lan)
-          ftmpl[0] = cnf.webpath + "/view/404.html"
-          tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
         }
       } else if r.PostForm.Get("langchange") != "" {
         cookie, err := r.Cookie("lang")
         if err != nil || cookie.Value == "ja" {
-          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "en", MaxAge: 31536000, Path: "/"})
+          http.SetCookie(w, &http.Cookie{Name: "lang", Value: "en", MaxAge: 31536000, Path: "/"})
         } else {
-          http.SetCookie(w, &http.Cookie {Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
+          http.SetCookie(w, &http.Cookie{Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
         }
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
       }
     } else { // r.Method == "GET"
-      if uri == "/" && qnewurl == "" {
+      if uri == "/" {
+        data.Tit = getloc("top", data.Lan)
         ftmpl[0] = cnf.webpath + "/view/index.html"
-        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
-      } else if uri != "/" && qnewurl == "" {
+      } else {
         red, _ := geturl(uri[1:], cnf.linkpath, false)
         if red != "" {
           http.Redirect(w, r, red, http.StatusSeeOther)
           return
-        } else {
-          data.Tit = getloc("mikensyutu", data.Lan)
-          data.Err = getloc("errurlnai", data.Lan)
-          ftmpl[0] = cnf.webpath + "/view/404.html"
-          tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
         }
-      } else if uri == "/" && qnewurl != "" {
-        data.Url = qnewurl
-        data.Dom = cnf.domain
-        data.Tit = getloc("tansyukuzumi", data.Lan)
-        ftmpl[0] = cnf.webpath + "/view/submitted.html"
-        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
-      } else {
-        data.Tit = getloc("mikensyutu", data.Lan)
-        data.Err = getloc("errurlnai", data.Lan)
-        ftmpl[0] = cnf.webpath + "/view/404.html"
-        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
       }
     } // r.Method
 
+    tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
     tmpl.Execute(w, data)
     data = nil
   })
