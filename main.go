@@ -6,7 +6,7 @@ import (
   "strconv"
 )
 
-var version = "2.0.2"
+var version = "2.1.0p"
 
 func help () {
   fmt.Println("使い方：");

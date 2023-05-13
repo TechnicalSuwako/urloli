@@ -1,5 +1,5 @@
 NAME=urloli
-VERSION=2.0.2
+VERSION=$(cat main.go | grep "var version" | awk '{print $4}' | sed "s/\"//g")
 # Linux、Cruxの場合は必須。他のディストリビューションはどうでも良い
 PREFIX=/usr
 # FreeBSDとOpenBSD

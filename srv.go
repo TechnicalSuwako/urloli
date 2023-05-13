@@ -17,9 +17,10 @@ type Page struct {
 
 func serv (cnf Config, port int) {
   http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+  ftmpl := []string{cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"}
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-    data := &Page{Tit: "トップ", Ver: version}
+    data := &Page{Ver: version}
     cookie, err := r.Cookie("lang")
     if err != nil {
       data.Lan = "ja"
@@ -30,10 +31,9 @@ func serv (cnf Config, port int) {
     uri := r.URL.Path
     query := r.URL.Query()
     qnewurl := query.Get("newurl")
-    if data.Lan == "en" {
-      data.Tit = "Top"
-    }
-    tmpl := template.Must(template.ParseFiles(cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+    data.Tit = getloc("top", data.Lan)
+    ftmpl[0] = cnf.webpath + "/view/index.html"
+    tmpl := template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
 
     if r.Method == "POST" {
       err := r.ParseForm()
@@ -44,24 +44,16 @@ func serv (cnf Config, port int) {
           chkprx := checkprefix(addurl)
           chklim := checkcharlim(addurl)
           if !chkprx {
-            if data.Lan == "ja" {
-              data.Tit = "不正なURL"
-              data.Err = "URLは「http://」又は「https://」で始めます。"
-            } else {
-              data.Tit = "Invalid URL"
-              data.Err = "The URL should start with \"http://\" or \"https://\"."
-            }
-            tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+            data.Tit = getloc("fuseiurl", data.Lan)
+            data.Err = getloc("errfusei", data.Lan)
+            ftmpl[0] = cnf.webpath + "/view/404.html"
+            tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
           }
           if !chklim {
-            if data.Lan == "ja" {
-              data.Tit = "不正なURL"
-              data.Err = "URLは500文字以内です。"
-            } else {
-              data.Tit = "Invalid URL"
-              data.Err = "The URL should be less than 500 characters."
-            }
-            tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+            data.Tit = getloc("fuseiurl", data.Lan)
+            data.Err = getloc("errcharlim", data.Lan)
+            ftmpl[0] = cnf.webpath + "/view/404.html"
+            tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
           }
 
           if chklim && chkprx {
@@ -73,23 +65,16 @@ func serv (cnf Config, port int) {
               res := insertjson(addurl, cnf.linkpath)
               data.Url = res
               data.Dom = cnf.domain
-              if data.Lan == "ja" {
-                data.Tit = "短縮済み"
-              } else {
-                data.Tit = "Shortened"
-              }
-              tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/submitted.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+              data.Tit = getloc("tansyukuzumi", data.Lan)
+              ftmpl[0] = cnf.webpath + "/view/submitted.html"
+              tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
             }
           }
         } else {
-          if data.Lan == "ja" {
-            data.Tit = "未検出"
-            data.Err = "URLをご入力下さい。"
-          } else {
-            data.Tit = "Not found"
-            data.Err = "Please enter a URL."
-          }
-          tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+          data.Tit = getloc("mikensyutu", data.Lan)
+          data.Err = getloc("errurlent", data.Lan)
+          ftmpl[0] = cnf.webpath + "/view/404.html"
+          tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
         }
       } else if r.PostForm.Get("langchange") != "" {
         cookie, err := r.Cookie("lang")
@@ -103,40 +88,30 @@ func serv (cnf Config, port int) {
       }
     } else {
       if uri == "/" && qnewurl == "" {
-        tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+        ftmpl[0] = cnf.webpath + "/view/index.html"
+        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
       } else if uri != "/" && qnewurl == "" {
         red, _ := geturl(uri[1:], cnf.linkpath, false)
         if red != "" {
           http.Redirect(w, r, red, http.StatusSeeOther)
           return
         } else {
-          if data.Lan == "ja" {
-            data.Tit = "未検出"
-            data.Err = "このURLを見つけられませんでした。"
-          } else {
-            data.Tit = "Not found"
-            data.Err = "This URL could not be found."
-          }
-          tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+          data.Tit = getloc("mikensyutu", data.Lan)
+          data.Err = getloc("errurlnai", data.Lan)
+          ftmpl[0] = cnf.webpath + "/view/404.html"
+          tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
         }
       } else if uri == "/" && qnewurl != "" {
         data.Url = qnewurl
         data.Dom = cnf.domain
-        if data.Lan == "ja" {
-          data.Tit = "短縮済み"
-        } else {
-          data.Tit = "Shortened"
-        }
-        tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/submitted.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+        data.Tit = getloc("tansyukuzumi", data.Lan)
+        ftmpl[0] = cnf.webpath + "/view/submitted.html"
+        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
       } else {
-        if data.Lan == "ja" {
-          data.Tit = "未検出"
-          data.Err = "このURLを見つけられませんでした。"
-        } else {
-          data.Tit = "Not found"
-          data.Err = "This URL could not be found."
-        }
-        tmpl = template.Must(template.ParseFiles(cnf.webpath + "/view/404.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"))
+        data.Tit = getloc("mikensyutu", data.Lan)
+        data.Err = getloc("errurlnai", data.Lan)
+        ftmpl[0] = cnf.webpath + "/view/404.html"
+        tmpl = template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
       }
     }
 
