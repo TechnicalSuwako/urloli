@@ -6,7 +6,7 @@
 ### 従属ソフト
 
 * Go 1.19以上
-* nginx又はOpenBSDのhttpd
+* nginx又はOpenBSDのrelayd
 * 良いOS (GNU/Linux、OpenBSD、又はFreeBSD)
 
 ## インストールする方法
@@ -26,27 +26,19 @@ nvim /etc/rc.d/urloli
 
 ```
 #!/bin/ksh
-#
-# $OpenBSD: urloli.rc,v 1.4 2018/01/11 19:27:11 rpe Exp $
 
-name="urloli"
-daemon="/usr/local/bin/${name}"
+daemon="/usr/local/bin/urloli -s"
 
 . /etc/rc.d/rc.subr
+
+rc_bg=YES
+rc_reload=NO
 
 rc_cmd $1
 ```
 
 ```sh
-nvim /etc/rc.conf.local
-```
-
-```
-relayd_flags=
-pkg_scripts=urloli
-```
-
-```sh
+chmod +x /etc/rc.d/urloli
 rcctl enable urloli
 rcctl start urloli
 ```
@@ -212,18 +204,35 @@ nvim /etc/relayd.conf
 ```
 
 ```
-table <urloli> { IPADDRESS }
+# $OpenBSD: relayd.conf,v 1.5 2018/05/06 20:56:55 benno Exp $
+#
+relayd_address="0.0.0.0"
 
-http protocol "httpproxy" {
-  pass request quick header "Host" value "DOMAIN" forward to <urloli>
-  block
+table <urloli> { 127.0.0.1 }
+
+http protocol reverse_proxy {
+  tls keypair "DOMAIN"
+  match request header append "X-Forwarded-For" value "$REMOTE_ADDR"
+  match request header append "X-Forwarded-Port" value "$REMOTE_PORT"
+
+  match response header set "Referrer-Policy" value "same-origin"
+  match response header set "X-Frame-Options" value "deny"
+  match response header set "X-XSS-Protection" value "1; mode=block"
+  match response header set "X-Content-Type-Options" value "nosniff"
+  match response header set "Strict-Transport-Security" value "max-age=31536000; includeSubDomains; preload"
+  match response header set "Cache-Control" value "max-age=86400"
+
+  pass request quick header "Host" value "urlo.li" forward to <urloli>
+
+  return error
+  pass
 }
 
-relay "proxy" {
-  listen on * port 443 tls 
-  protocol "httpproxy"
+relay www {
+  listen on $relayd_address port 443 tls 
+  protocol $relayd_address
 
-  forward to * port 9910
+  forward to <urloli> check tcp port 9910
 }
 ```
 
