@@ -49,7 +49,7 @@ dist: clean
 	mkdir -p ${NAME}-${VERSION}
 	cp -R LICENSE.txt Makefile README.md CHANGELOG.md\
 		view static logo.jpg\
-		${NAME}.1 *.go *.json ${NAME}-${VERSION}
+		${NAME}.1 *.go *.json go.mod ${NAME}-${VERSION}
 	tar zcfv ${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
 	rm -rf ${NAME}-${VERSION}
 
