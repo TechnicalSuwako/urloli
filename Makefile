@@ -46,11 +46,11 @@ clean:
 	rm -f ${NAME} ${NAME}-${VERSION}.tar.gz
 
 dist: clean
-	mkdir -p ${NAME}${VERSION}
+	mkdir -p ${NAME}-${VERSION}
 	cp -R LICENSE.txt Makefile README.md CHANGELOG.md\
 		view static logo.jpg\
 		${NAME}.1 *.go *.json ${NAME}-${VERSION}
-	tar -zcfv ${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
+	tar zcfv ${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
 	rm -rf ${NAME}-${VERSION}
 
 install: all
