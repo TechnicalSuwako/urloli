@@ -14,6 +14,7 @@ type Config struct {
   linkpath string
   webpath string
   domain string
+  ip string
 }
 
 func geturl (url string, linkpath string, checkjson bool) (string, string) {
@@ -75,6 +76,9 @@ func getconf () (Config, error) {
   if payload["domain"] == nil {
     return cnf, errors.New("「domain」の値が設置していません。")
   }
+  if payload["ip"] == nil {
+    return cnf, errors.New("「ip」の値が設置していません。")
+  }
   if _, err := os.Stat(payload["webpath"].(string)); err != nil {
     fmt.Printf("%v\n", err)
     return cnf, errors.New("mkdirコマンドを使って、 " + payload["webpath"].(string))
@@ -84,6 +88,7 @@ func getconf () (Config, error) {
   }
   cnf.webpath = payload["webpath"].(string)
   cnf.domain = payload["domain"].(string)
+  cnf.ip = payload["ip"].(string)
   payload = nil
 
   return cnf, nil

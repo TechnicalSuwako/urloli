@@ -6,6 +6,9 @@ import (
   "net/http"
   "encoding/json"
   "strings"
+  "log"
+  "os"
+  "path/filepath"
 )
 
 type (
@@ -32,7 +35,16 @@ type (
 )
 
 func serv (cnf Config, port int) {
-  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+  dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+  if err != nil {
+    log.Fatal(err)
+  }
+  err = os.Chdir(dir)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(cnf.webpath + "/static"))))
   ftmpl := []string{cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"}
 
   http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
@@ -156,6 +168,6 @@ func serv (cnf Config, port int) {
     data = nil
   })
 
-  fmt.Println(fmt.Sprint("http://127.0.0.1:", port, " でサーバーを実行中。終了するには、CTRL+Cを押して下さい。"))
-  http.ListenAndServe(fmt.Sprint(":", port), nil)
+  fmt.Println(fmt.Sprint("http://" + cnf.ip + ":", port, " でサーバーを実行中。終了するには、CTRL+Cを押して下さい。"))
+  http.ListenAndServe(cnf.ip + ":9910", nil)
 }
