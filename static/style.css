@@ -54,11 +54,27 @@ input {
   border: 1px #ff3b3b groove;
 }
 
-.submit, .footer, h1, .switchlang {
-  text-align: center;
+select {
+  background-color: #683c7a;
+  color: #d6a9d6;
+  font-size: 18px;
+  border-radius: 4px;
+  max-width: 700px;
+  border: 1px #f9f groove;
+  padding: 8px;
+  width: 200px;
+}
+
+select, input.langchange {
+  height: 35px;
+  vertical-align: middle;
 }
 
 .submit, .footer, h1 {
+  text-align: center;
   margin-top: 32px;
 }
 
+input.langchange {
+  font-size: 24px;
+}

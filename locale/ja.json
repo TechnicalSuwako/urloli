@@ -1,0 +1,16 @@
+{
+  "top": "トップ",
+  "logo": "ロゴ",
+  "fuseiurl": "不正なURL",
+  "tansyukuzumi": "短縮済み",
+  "mikensyutu": "未検出",
+  "errfusei": "URLは「http://」又は「https://」で始めます。",
+  "errcharlim": "URLは500文字以内です。",
+  "errurlent": "URLをご入力下さい。",
+  "errurlnai": "このURLを見つけられませんでした。",
+  "totop": "トップページに戻る",
+  "canunderaccess": "下記のURLからアクセス出来ます。",
+  "enterurl": "URLをご入力下さい",
+  "submit": "送信",
+  "langchange": "言語変更"
+}

@@ -1,0 +1,16 @@
+{
+  "top": "Top",
+  "logo": "Logo",
+  "fuseiurl": "Invalid URL",
+  "tansyukuzumi": "Shortened",
+  "mikensyutu": "Not found",
+  "errfusei": "The URL should start with \"http://\" or \"https://\".",
+  "errcharlim": "The URL should be less than 500 characters.",
+  "errurlent": "Please enter a URL.",
+  "errurlnai": "This URL could not be found.",
+  "totop": "Return to toppage",
+  "canunderaccess": "Please enter a URL.",
+  "enterurl": "Please enter a URL.",
+  "submit": "Submit",
+  "langchange": "Change language"
+}

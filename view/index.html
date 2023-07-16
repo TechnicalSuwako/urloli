@@ -1,16 +1,20 @@
 {{template "header" .}}
-      <form action="/" method="POST">
-        <div class="switchlang">
-          <input class="langchange" type="submit" name="langchange" value="{{if eq .Lan "ja"}}Change to English{{else}}日本語に変更する{{end}}" />
-        </div>
-      </form>
+      <div class="form">
+        <form action="/" method="POST">
+          <select class="langchange" name="lang">
+            <option value="ja"{{if eq .Lan "ja"}} selected{{end}}>日本語</option>
+            <option value="en"{{if eq .Lan "en"}} selected{{end}}>English</option>
+          </select>
+          <input class="langchange" type="submit" name="langchange" value="{{.T "langchange"}}" />
+        </form>
+      </div>
       <hr />
-      {{if eq .Lan "ja"}}URLをご入力下さい{{else}}Please enter a URL.{{end}}
+      {{.T "enterurl"}}
       <div class="form">
         <form action="/" method="POST">
           <input type="text" name="newadd" value="" />
           <div class="submit">
-            <input type="submit" name="sosin" value="{{if eq .Lan "ja"}}送信{{else}}Submit{{end}}" />
+            <input type="submit" name="sosin" value="{{.T "submit"}}" />
           </div>
         </form>
       </div>

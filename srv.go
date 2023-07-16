@@ -9,17 +9,13 @@ import (
   "log"
   "os"
   "path/filepath"
+  "gitler.moe/suwako/goliblocale"
 )
 
 type (
   Page struct {
-    Tit string
-    Err string
-    Url string
-    Dom string
-    Lan string
-    Ver string
-    Ves string
+    Tit, Err, Url, Dom, Lan, Ver, Ves string
+    i18n map[string]string
   }
   Api struct {
     Cod int `json:"code"`
@@ -33,6 +29,28 @@ type (
     Ver string `json:"version"`
   }
 )
+
+func (p Page) T (key string) string {
+  return p.i18n[key]
+}
+
+func initloc (r *http.Request) string {
+  supportLang := map[string]bool{
+    "ja": true,
+    "en": true,
+  }
+
+	cookie, err := r.Cookie("lang")
+  if err != nil {
+	  return "ja"
+	}
+
+  if _, ok := supportLang[cookie.Value]; ok {
+    return cookie.Value
+  } else {
+    return "ja"
+  }
+}
 
 func serv (cnf Config, port int) {
   dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -55,6 +73,13 @@ func serv (cnf Config, port int) {
   })
 
   http.HandleFunc("/api/lolify", func(w http.ResponseWriter, r *http.Request) {
+    lang := initloc(r)
+    i18n, err := goliblocale.GetLocale("locale/" + lang)
+    if err != nil {
+      fmt.Println("liblocaleエラー：%v", err)
+      return
+    }
+
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(200)
     res := &Api{Cod: 500, Err: "未対応"}
@@ -69,10 +94,10 @@ func serv (cnf Config, port int) {
           chkprx := checkprefix(addurl)
           chklim := checkcharlim(addurl)
           if !chkprx {
-            res = &Api{Cod: 400, Err: getloc("errfusei", "ja")}
+            res = &Api{Cod: 400, Err: i18n["errfusei"]}
           }
           if !chklim {
-            res = &Api{Cod: 400, Err: getloc("errcharlim", "ja")}
+            res = &Api{Cod: 400, Err: i18n["errcharlim"]}
           }
 
           if chklim && chkprx {
@@ -84,7 +109,7 @@ func serv (cnf Config, port int) {
             }
           }
         } else {
-          res = &Api{Cod: 400, Err: getloc("errurlent", "ja")}
+          res = &Api{Cod: 400, Err: i18n["errurlent"]}
         }
       }
     }
@@ -96,17 +121,19 @@ func serv (cnf Config, port int) {
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
     data := &Page{Ver: version, Ves: strings.ReplaceAll(version, ".", "")}
     uri := r.URL.Path
+    lang := initloc(r)
 
-    cookie, err := r.Cookie("lang")
+    i18n, err := goliblocale.GetLocale("locale/" + lang)
     if err != nil {
-      data.Lan = "ja"
-    } else {
-      data.Lan = cookie.Value
+      fmt.Println("liblocaleエラー：%v", err)
+      return
     }
+    data.i18n = i18n
+    data.Lan = lang
 
     // デフォルトページ＝未検出
-    data.Tit = getloc("mikensyutu", data.Lan)
-    data.Err = getloc("errurlnai", data.Lan)
+    data.Tit = i18n["mikensyutu"]
+    data.Err = i18n["errurlnai"]
     ftmpl[0] = cnf.webpath + "/view/404.html"
     tmpl := template.Must(template.ParseFiles(ftmpl[0], ftmpl[1], ftmpl[2]))
 
@@ -119,11 +146,11 @@ func serv (cnf Config, port int) {
           chkprx := checkprefix(addurl)
           chklim := checkcharlim(addurl)
           if !chkprx || !chklim {
-            data.Tit = getloc("fuseiurl", data.Lan)
+            data.Tit = i18n["fuseiurl"]
             if !chkprx {
-              data.Err = getloc("errfusei", data.Lan)
+              data.Err = i18n["errfusei"]
             } else if !chklim {
-              data.Err = getloc("errcharlim", data.Lan)
+              data.Err = i18n["errcharlim"]
             }
           } else {
             chkfn, _ := geturl(addurl, cnf.linkpath, true)
@@ -133,26 +160,22 @@ func serv (cnf Config, port int) {
             } else {
               data.Url = insertjson(addurl, cnf.linkpath)
               data.Dom = cnf.domain
-              data.Tit = getloc("tansyukuzumi", data.Lan)
+              data.Tit = i18n["tansyukuzumi"]
               ftmpl[0] = cnf.webpath + "/view/submitted.html"
             }
           }
         } else {
-          data.Err = getloc("errurlent", data.Lan)
+          data.Err = i18n["errurlent"]
         }
       } else if r.PostForm.Get("langchange") != "" {
-        cookie, err := r.Cookie("lang")
-        if err != nil || cookie.Value == "ja" {
-          http.SetCookie(w, &http.Cookie{Name: "lang", Value: "en", MaxAge: 31536000, Path: "/"})
-        } else {
-          http.SetCookie(w, &http.Cookie{Name: "lang", Value: "ja", MaxAge: 31536000, Path: "/"})
-        }
+        lang := r.PostForm.Get("lang")
+        http.SetCookie(w, &http.Cookie{Name: "lang", Value: lang, MaxAge: 31536000, Path: "/"})
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
       }
     } else { // r.Method == "GET"
       if uri == "/" {
-        data.Tit = getloc("top", data.Lan)
+        data.Tit = i18n["top"]
         ftmpl[0] = cnf.webpath + "/view/index.html"
       } else {
         red, _ := geturl(uri[1:], cnf.linkpath, false)
@@ -169,5 +192,5 @@ func serv (cnf Config, port int) {
   })
 
   fmt.Println(fmt.Sprint("http://" + cnf.ip + ":", port, " でサーバーを実行中。終了するには、CTRL+Cを押して下さい。"))
-  http.ListenAndServe(cnf.ip + ":9910", nil)
+  http.ListenAndServe(fmt.Sprint(cnf.ip + ":", port), nil)
 }

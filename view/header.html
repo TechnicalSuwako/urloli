@@ -12,11 +12,11 @@
   </head>
   <body>
     <h1>
-      <img class="headerimg" src="/static/logo.jpg" alt="{{if eq .Lan "ja"}}ロゴ{{else}}Logo{{end}}" />
+      <img class="headerimg" src="/static/logo.jpg" alt="{{.T "logo"}}" />
     </h1>
     <div class="body">
       <p>
-        <a href="/">{{if eq .Lan "ja"}}トップ{{else}}Top{{end}}</a> |
+        <a href="/">{{.T "top"}}</a> |
         <a href="https://technicalsuwako.moe/blog/urloli-{{.Ves}}/">urloli-{{.Ver}}</a>
       </p>
 {{end}}

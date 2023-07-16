@@ -10,11 +10,7 @@ import (
 )
 
 type Config struct {
-  configpath string
-  linkpath string
-  webpath string
-  domain string
-  ip string
+  configpath, linkpath, webpath, domain, ip string
 }
 
 func geturl (url string, linkpath string, checkjson bool) (string, string) {
@@ -53,11 +49,13 @@ func getconf () (Config, error) {
   prefix := "/usr"
   if runtime.GOOS == "freebsd" || runtime.GOOS == "openbsd" {
     prefix += "/local"
+  } else if runtime.GOOS == "netbsd" {
+    prefix += "/pkg"
   }
 
   cnf.configpath = "/etc/urloli/config.json"
   cnf.linkpath = "/etc/urloli/links.json"
-  if runtime.GOOS == "freebsd" {
+  if runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
     cnf.configpath = prefix + cnf.configpath
     cnf.linkpath = prefix + cnf.linkpath
   }
