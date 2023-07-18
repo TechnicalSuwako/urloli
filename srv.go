@@ -74,7 +74,7 @@ func serv (cnf Config, port int) {
 
   http.HandleFunc("/api/lolify", func(w http.ResponseWriter, r *http.Request) {
     lang := initloc(r)
-    i18n, err := goliblocale.GetLocale("locale/" + lang)
+    i18n, err := goliblocale.GetLocale(cnf.webpath + "/locale/" + lang)
     if err != nil {
       fmt.Println("liblocaleエラー：%v", err)
       return
@@ -123,7 +123,7 @@ func serv (cnf Config, port int) {
     uri := r.URL.Path
     lang := initloc(r)
 
-    i18n, err := goliblocale.GetLocale("locale/" + lang)
+    i18n, err := goliblocale.GetLocale(cnf.webpath + "/locale/" + lang)
     if err != nil {
       fmt.Println("liblocaleエラー：%v", err)
       return
