@@ -9,6 +9,9 @@ import (
 var version = "2.2.0"
 
 func help () {
+  fmt.Println("０７６ URLロリ - クッソ小さいURL短縮作成ソフトだわ〜♡")
+  fmt.Println("https://urlo.li/ | https://gitler.moe/suwako/urloli")
+  fmt.Println("")
   fmt.Println("使い方：");
   fmt.Println("urloli -v               ：バージョンを表示");
   fmt.Println("urloli -s [ポート番号]  ：ポート番号でウェブサーバーを実行（デフォルト＝9910）");
