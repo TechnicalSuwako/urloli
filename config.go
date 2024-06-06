@@ -63,7 +63,9 @@ func getconf () (Config, error) {
   data, err := ioutil.ReadFile(cnf.configpath)
   if err != nil {
     fmt.Println("config.jsonを開けられません: ", err)
-    return cnf, errors.New("コンフィグファイルは " + cnf.configpath + " に創作して下さい。")
+    return cnf, errors.New(
+      "コンフィグファイルは " + cnf.configpath + " に創作して下さい。",
+    )
   }
 
   var payload map[string]interface{}
@@ -82,7 +84,9 @@ func getconf () (Config, error) {
     return cnf, errors.New("mkdirコマンドを使って、 " + payload["webpath"].(string))
   }
   if !checkprefix(payload["domain"].(string)) {
-    return cnf, errors.New("URLは「http://」又は「https://」で始める様にして下さい。")
+    return cnf, errors.New(
+      "URLは「http://」又は「https://」で始める様にして下さい。",
+    )
   }
   cnf.webpath = payload["webpath"].(string)
   cnf.domain = payload["domain"].(string)

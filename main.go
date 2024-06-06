@@ -9,18 +9,11 @@ import (
 var sofname = "urloli"
 var version = "2.3.0"
 
-func help () {
-  fmt.Println("０７６ URLロリ - クッソ小さいURL短縮作成ソフトだわ〜♡")
-  fmt.Println("https://urlo.li/ | https://gitler.moe/suwako/urloli")
-  fmt.Println("")
-  fmt.Println("使い方：");
-  fmt.Println("urloli -v               ：バージョンを表示");
-  fmt.Println("urloli -s [ポート番号]  ：ポート番号でウェブサーバーを実行（デフォルト＝9910）");
-  fmt.Println("urloli -h               ：ヘルプを表示");
-  fmt.Println("urloli <URL>            ：コマンドラインでURLを短縮");
+func usage() {
+  fmt.Printf("%s-%s\nusage: %s [-s port] [url]\n", sofname, version, sofname)
 }
 
-func main () {
+func main() {
   cnf, err := getconf()
   if err != nil {
     fmt.Println(err)
@@ -28,38 +21,33 @@ func main () {
   }
   args := os.Args
 
-  if len(args) == 2 {
-    if args[1] == "-v" {
-      fmt.Println("urloli-" + version)
+  if len(args) < 2 {
+    usage()
+    return
+  }
+
+  if len(args) == 2 && args[1] == "-s" {
+    serv(cnf, 9910)
+  } else if len(args) == 2 && args[1] != "-s" {
+    if !checkprefix(args[1]) {
+      fmt.Println("URLは不正です。終了…")
       return
-    } else if args[1] == "-s" {
-      serv(cnf, 9910)
-    } else if args[1] == "-h" {
-      help()
-      return
-    } else {
-      if checkprefix(args[1]) {
-        _, key := geturl(args[1], cnf.linkpath, true)
-        if (key != "") {
-          fmt.Println(cnf.domain + "/" + key)
-        } else {
-          fmt.Println(cnf.domain + "/" + insertjson(args[1], cnf.linkpath))
-        }
-        return
-      } else {
-        fmt.Println("URLは不正です。終了…")
-        return
-      }
     }
+
+    _, key := geturl(args[1], cnf.linkpath, true)
+    if (key != "") {
+      fmt.Println(cnf.domain + "/" + key)
+    } else {
+      fmt.Println(cnf.domain + "/" + insertjson(args[1], cnf.linkpath))
+    }
+    return
   } else if len(args) == 3 && args[1] == "-s" {
-    if port, err := strconv.Atoi(args[2]); err != nil {
+    port, err := strconv.Atoi(args[2])
+    if err != nil {
       fmt.Printf("%qは数字ではありません。\n", args[2])
       return
-    } else {
-      serv(cnf, port)
     }
-  } else {
-    help()
-    return
+
+    serv(cnf, port)
   }
 }

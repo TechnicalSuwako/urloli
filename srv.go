@@ -62,8 +62,15 @@ func serv (cnf Config, port int) {
     log.Fatal(err)
   }
 
-  http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(cnf.webpath + "/static"))))
-  ftmpl := []string{cnf.webpath + "/view/index.html", cnf.webpath + "/view/header.html", cnf.webpath + "/view/footer.html"}
+  http.Handle(
+    "/static/",
+    http.StripPrefix("/static/", http.FileServer(http.Dir(cnf.webpath + "/static"))),
+  )
+  ftmpl := []string{
+    cnf.webpath + "/view/index.html",
+    cnf.webpath + "/view/header.html",
+    cnf.webpath + "/view/footer.html",
+  }
 
   http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -76,7 +83,7 @@ func serv (cnf Config, port int) {
     lang := initloc(r)
     i18n, err := goliblocale.GetLocale(cnf.webpath + "/locale/" + lang)
     if err != nil {
-      fmt.Println("liblocaleエラー：%v", err)
+      fmt.Printf("liblocaleエラー：%v", err)
       return
     }
 
@@ -103,9 +110,19 @@ func serv (cnf Config, port int) {
           if chklim && chkprx {
             chkfn, key := geturl(addurl, cnf.linkpath, true)
             if chkfn != "" {
-              res = &Api{Cod: 200, Url: cnf.domain + "/" + key, Mot: addurl, New: false}
+              res = &Api{
+                Cod: 200,
+                Url: cnf.domain + "/" + key,
+                Mot: addurl,
+                New: false,
+              }
             } else {
-              res = &Api{Cod: 200, Url: cnf.domain + "/" + insertjson(addurl, cnf.linkpath), Mot: addurl, New: true}
+              res = &Api{
+                Cod: 200,
+                Url: cnf.domain + "/" + insertjson(addurl, cnf.linkpath),
+                Mot: addurl,
+                New: true,
+              }
             }
           }
         } else {
@@ -125,7 +142,7 @@ func serv (cnf Config, port int) {
 
     i18n, err := goliblocale.GetLocale(cnf.webpath + "/locale/" + lang)
     if err != nil {
-      fmt.Println("liblocaleエラー：%v", err)
+      fmt.Printf("liblocaleエラー：%v", err)
       return
     }
     data.i18n = i18n
@@ -169,7 +186,10 @@ func serv (cnf Config, port int) {
         }
       } else if r.PostForm.Get("langchange") != "" {
         lang := r.PostForm.Get("lang")
-        http.SetCookie(w, &http.Cookie{Name: "lang", Value: lang, MaxAge: 31536000, Path: "/"})
+        http.SetCookie(
+          w,
+          &http.Cookie{Name: "lang", Value: lang, MaxAge: 31536000, Path: "/"},
+        )
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
       }
@@ -191,6 +211,10 @@ func serv (cnf Config, port int) {
     data = nil
   })
 
-  fmt.Println(fmt.Sprint("http://" + cnf.ip + ":", port, " でサーバーを実行中。終了するには、CTRL+Cを押して下さい。"))
+  fmt.Println(fmt.Sprint(
+    "http://" + cnf.ip + ":",
+    port,
+    " でサーバーを実行中。終了するには、CTRL+Cを押して下さい。",
+  ))
   http.ListenAndServe(fmt.Sprint(cnf.ip + ":", port), nil)
 }
