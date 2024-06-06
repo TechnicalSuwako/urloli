@@ -6,7 +6,8 @@ import (
   "strconv"
 )
 
-var version = "2.2.0"
+var sofname = "urloli"
+var version = "2.3.0"
 
 func help () {
   fmt.Println("０７６ URLロリ - クッソ小さいURL短縮作成ソフトだわ〜♡")

@@ -1,5 +1,6 @@
 # 2.3.0
 * GPL→ISC
+* GNU Make→BSD Make
 
 # 2.2.0
 * ポート番号の修正
